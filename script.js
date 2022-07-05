@@ -1,31 +1,38 @@
-const video = document.getElementById('video')
+const screen = document.getElementById("screen");
 
 Promise.all([
-  faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-  faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-  faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-  faceapi.nets.faceExpressionNet.loadFromUri('/models')
-]).then(startVideo)
+  faceapi.nets.tinyFaceDetector.loadFromUri("models"),
+  faceapi.nets.faceLandmark68Net.loadFromUri("models"),
+  faceapi.nets.faceRecognitionNet.loadFromUri("models"),
+  faceapi.nets.faceExpressionNet.loadFromUri("models"),
+]).then(startScreen);
 
-function startVideo() {
+function startScreen() {
   navigator.getUserMedia(
     { video: {} },
-    stream => video.srcObject = stream,
-    err => console.error(err)
-  )
+    (stream) => (screen.srcObject = stream),
+    (err) => console.log(err)
+  );
 }
 
-video.addEventListener('play', () => {
-  const canvas = faceapi.createCanvasFromMedia(video)
-  document.body.append(canvas)
-  const displaySize = { width: video.width, height: video.height }
-  faceapi.matchDimensions(canvas, displaySize)
+screen.addEventListener("play", () => {
+  console.log("The video is playing");
+  const canvas = faceapi.createCanvasFromMedia(screen);
+  document.body.append(canvas);
+  const displaySize = { width: screen.width, height: screen.height };
+  faceapi.matchDimensions(canvas, displaySize);
   setInterval(async () => {
-    const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions()
-    const resizedDetections = faceapi.resizeResults(detections, displaySize)
-    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
-    faceapi.draw.drawDetections(canvas, resizedDetections)
-    faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
-    faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
-  }, 100)
-})
+    const detections = await faceapi
+      .detectAllFaces(screen, new faceapi.TinyFaceDetectorOptions())
+      .withFaceLandmarks()
+      .withFaceExpressions()
+    console.log(detections);
+
+    const resizeDetections = faceapi.resizeResults(detections, displaySize);
+    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+    faceapi.draw.drawDetections(canvas, resizeDetections);
+    faceapi.draw.drawFaceLandmarks(canvas, resizeDetections);
+    faceapi.draw.drawFaceExpressions(canvas, resizeDetections);
+    // faceapi.draw.drawAgeAndGender(canvas, resizeDetections);
+  }, 100);
+});
